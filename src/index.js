@@ -83,8 +83,10 @@ app.post('/compare', uploadMinio.single('file'), async (req, res) => {
 	}
 })
 
-app.listen(3000, async () => {
+const port = process.env.PORT || 3360
+
+app.listen(port, async () => {
 	await loadModels()
 
-	console.log('Executando em http://localhost:3000')
+	console.log(`Executando em http://localhost:${port}`)
 })
