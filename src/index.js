@@ -60,6 +60,8 @@ app.post('/compare', uploadMinio.single('file'), async (req, res) => {
 			})
 		}
 
+		console.log('Links das imagens OK!')
+
 		const comparisonResult = await compareImages(
 			referenceImageURL, 
 			imageToCompareURL

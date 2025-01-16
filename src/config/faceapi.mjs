@@ -38,6 +38,8 @@ async function getFaceDescriptors(imagePath) {
 
 async function recognizeFaces(referenceImagePath, targetImagePath) {
 	// Obter descritores da imagem de referência
+	console.log('Obtendo descritores da imagem de referÊncia...')
+
 	const referenceDetections = await getFaceDescriptors(referenceImagePath)
 
 	if (referenceDetections.length === 0) {
@@ -58,6 +60,8 @@ async function recognizeFaces(referenceImagePath, targetImagePath) {
 	const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.6) // Limite de similaridade
 
 	// Obter descritores da imagem de destino
+	console.log('Obtendo descritores da imagem de comparação...')
+
 	const targetDetections = await getFaceDescriptors(targetImagePath)
 
 	if (targetDetections.length === 0) {
@@ -92,7 +96,7 @@ async function recognizeFaces(referenceImagePath, targetImagePath) {
 }
 
 export async function compareImages(referenceImagePath, targetImagePath) {
-	console.log('Processando...')
+	console.log('Comparando imagens...')
 
 	const comparisonResult = await recognizeFaces(referenceImagePath, targetImagePath)
 
