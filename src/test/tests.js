@@ -1,6 +1,5 @@
-import fs from "fs"
-import { loadModels } from "../config/faceapi.mjs"
-import faceapi, { loadModels, recognizeFaces } from '../config/faceapi.mjs'
+const fs = require("fs")
+const { faceapi, loadModels } = require('../config/faceapi')
 
 async function createImageWithLandmarks(url) {
 	// Carregar uma imagem

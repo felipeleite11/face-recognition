@@ -1,9 +1,9 @@
-import 'dotenv/config'
-import cors from 'cors'
-import express from 'express'
-import { uploadMinio } from './config/multer.mjs'
-import { storeFaceID, getReferenceRecord } from './config/redis.mjs'
-import { loadModels, compareImages } from './config/faceapi.mjs'
+require('dotenv/config')
+const cors = require('cors')
+const express = require('express')
+const { uploadMinio } = require('./config/multer')
+const { storeFaceID, getReferenceRecord } = require('./config/redis')
+const { loadModels, compareImages } = require('./config/faceapi')
 
 const app = express()
 
@@ -59,8 +59,6 @@ app.post('/compare', uploadMinio.single('file'), async (req, res) => {
 				message: 'A imagem de referência não está cadastrada na base.'
 			})
 		}
-
-		console.log('Links das imagens OK!')
 
 		const comparisonResult = await compareImages(
 			referenceImageURL, 

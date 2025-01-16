@@ -1,10 +1,12 @@
-import redis from 'redis'
+const redis = require('redis')
 
-export const redisClient = redis.createClient({
+const redisClient = redis.createClient({
 	url: 'redis://default:123456@easypanel.robot.rio.br:6379'
 })
 
-export async function storeFaceID(identifier, url) {
+exports.redisClient = redisClient
+
+exports.storeFaceID = async function(identifier, url) {
 	try {
 		await redisClient.connect()
 
@@ -14,7 +16,7 @@ export async function storeFaceID(identifier, url) {
 	}
 }
 
-export async function getReferenceRecord(identifier) {
+exports.getReferenceRecord = async function(identifier) {
 	try {
 		await redisClient.connect()
 	

@@ -1,9 +1,9 @@
-import multer from 'multer'
-import multerS3 from 'multer-s3'
-import { extname } from 'path'
-import { randomUUID } from 'crypto'
-import mimeTypes from 'node-mime-types'
-import { S3Client } from '@aws-sdk/client-s3'
+const multer = require('multer')
+const multerS3 = require('multer-s3')
+const { extname } = require('path')
+const { randomUUID } = require('crypto')
+const mimeTypes = require('node-mime-types')
+const { S3Client } = require('@aws-sdk/client-s3')
 
 const { getMIMEType } = mimeTypes
 
@@ -42,7 +42,7 @@ const minioStorage = multerS3({
     }
 })
 
-export const uploadMinio = multer({
+exports.uploadMinio = multer({
     storage: minioStorage,
     fileFilter: (req, file, callback) => {
         const extension = extname(file.originalname)

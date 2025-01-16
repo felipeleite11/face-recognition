@@ -1,11 +1,12 @@
-import canvas, { Canvas, Image, ImageData } from 'canvas'
-import * as faceapi from 'face-api.js'
+const canvas = require('canvas')
+const { Canvas, Image, ImageData } = require('canvas')
+const faceapi = require('face-api.js')
 
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData })
 
-export default faceapi
+exports.faceapi = faceapi
 
-export async function loadModels() {
+exports.loadModels = async function() {
 	const modelPath = './models'
 
 	await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath)
@@ -95,7 +96,7 @@ async function recognizeFaces(referenceImagePath, targetImagePath) {
 	}
 }
 
-export async function compareImages(referenceImagePath, targetImagePath) {
+exports.compareImages = async function(referenceImagePath, targetImagePath) {
 	console.log('Comparando imagens...')
 
 	const comparisonResult = await recognizeFaces(referenceImagePath, targetImagePath)
