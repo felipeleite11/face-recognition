@@ -1,5 +1,6 @@
 require('dotenv/config')
-require('@tensorflow/tfjs-node')
+require('@tensorflow/tfjs')
+const tf = require('@tensorflow/tfjs-node')
 const cors = require('cors')
 const express = require('express')
 const http = require('http')
@@ -95,6 +96,8 @@ const port = process.env.PORT || 3360
 
 server.listen(port, async () => {
 	await loadModels()
+
+	console.log('TensorFlow version: ', tf.version.tfjs)
 
 	console.log(`Executando em http://localhost:${port}`)
 })
