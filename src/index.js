@@ -100,4 +100,11 @@ server.listen(port, async () => {
 	console.log('TensorFlow version: ', tf.version.tfjs)
 
 	console.log(`Executando em http://localhost:${port}`)
+
+
+	const a = tf.tensor([1, 2, 3]);
+	const b = tf.tensor([4, 5, 6]);
+
+	const c = a.add(b);
+	c.print(); // Deve exibir [5, 7, 9]
 })
