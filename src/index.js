@@ -97,14 +97,10 @@ const port = process.env.PORT || 3360
 server.listen(port, async () => {
 	await loadModels()
 
-	console.log('TensorFlow version: ', tf.version.tfjs)
-
 	console.log(`Executando em http://localhost:${port}`)
-
-
-	const a = tf.tensor([1, 2, 3]);
-	const b = tf.tensor([4, 5, 6]);
-
-	const c = a.add(b);
-	c.print(); // Deve exibir [5, 7, 9]
+	
+	console.log('\n\nTensorFlow version: ', tf.version.tfjs)
+	tf.setBackend('tensorflow')
+	await tf.ready()
+	console.log(`Backend configurado: ${tf.getBackend()}`)
 })
