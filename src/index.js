@@ -1,4 +1,5 @@
 require('dotenv/config')
+require('@tensorflow/tfjs-node')
 const cors = require('cors')
 const express = require('express')
 const http = require('http')
