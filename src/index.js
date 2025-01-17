@@ -1,11 +1,12 @@
 require('dotenv/config')
 const cors = require('cors')
 const express = require('express')
+const http = require('http')
 const { uploadMinio } = require('./config/multer')
 const { storeFaceID, getReferenceRecord } = require('./config/redis')
 const { loadModels, compareImages } = require('./config/faceapi')
 
-const app = express()
+const app = express({})
 
 app.use(cors())
 app.use(express.json())
@@ -83,9 +84,15 @@ app.post('/compare', uploadMinio.single('file'), async (req, res) => {
 	}
 })
 
+const server = http.createServer(app)
+
+server.setTimeout(60 * 1000, () => { // 60 s
+	console.log('Timed out = 60s')
+})
+
 const port = process.env.PORT || 3360
 
-app.listen(port, async () => {
+server.listen(port, async () => {
 	await loadModels()
 
 	console.log(`Executando em http://localhost:${port}`)
