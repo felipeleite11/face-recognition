@@ -16,6 +16,8 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.get('/', (req, res) => {
+	console.log('Chamada recebida...')
+
 	return res.send('EXECUTANDO!')
 })
 

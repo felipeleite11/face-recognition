@@ -1,5 +1,4 @@
 const { connect } = require('amqplib')
-const { storeResult } = require('./redis')
 
 const queueName = 'face-recognition'
 
@@ -12,7 +11,7 @@ class MessageChannel {
 
 	async createMessageChannel() {
 		try {
-			const connection = await connect('amqp://guest:guest@localhost:5672')
+			const connection = await connect(process.env.AMQP_URL)
 
 			this.channel = await connection.createChannel()
 
