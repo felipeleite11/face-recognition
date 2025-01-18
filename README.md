@@ -1,8 +1,5 @@
 ## Documentação
 
-### URL base
-`https://robot-genesis-face-recognition-api.nyr4mj.easypanel.host`
-
 ### Endpoints
 
 `GET /`
