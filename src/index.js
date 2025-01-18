@@ -1,18 +1,23 @@
 require('dotenv/config')
-require('@tensorflow/tfjs')
-const tf = require('@tensorflow/tfjs-node')
 const cors = require('cors')
 const express = require('express')
 const http = require('http')
 const { uploadMinio } = require('./config/multer')
 const { storeFaceID, getReferenceRecord } = require('./config/redis')
-const { loadModels, compareImages } = require('./config/faceapi')
+const { loadModels, resolveResult } = require('./config/faceapi')
+const MessageChannel = require('./config/rabbit-mq')
+
+const messageChannel = new MessageChannel()
 
 const app = express({})
 
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+app.get('/', (req, res) => {
+	return res.send('EXECUTANDO!')
+})
 
 app.post('/reference', uploadMinio.single('file'), async (req, res) => {
 	const { identifier } = req.body
@@ -63,24 +68,13 @@ app.post('/compare', uploadMinio.single('file'), async (req, res) => {
 			})
 		}
 
-		const comparisonResult = await compareImages(
-			referenceImageURL, 
-			imageToCompareURL
-		)
-
-		if(typeof comparisonResult.isMatch !== 'undefined') {
-			const { isMatch, similarity } = comparisonResult
-
-			return res.json({
-				face_matched: isMatch,
-				similarity
-			})
-		}
-
-		return res.json({
-			face_matched: false,
-			message: comparisonResult.message
+		// Registra a tarefa de comparação no RabbitMQ
+		messageChannel.createMessage({
+			reference: referenceImageURL,
+			comparison: imageToCompareURL
 		})
+
+		return res.sendStatus(204)
 	} catch(e) {
 		return res.status(400).json({ message: e.message })
 	}
@@ -88,19 +82,14 @@ app.post('/compare', uploadMinio.single('file'), async (req, res) => {
 
 const server = http.createServer(app)
 
-server.setTimeout(60 * 1000, () => { // 60 s
-	console.log('Timed out = 60s')
-})
-
 const port = process.env.PORT || 3360
 
 server.listen(port, async () => {
 	await loadModels()
 
-	console.log(`Executando em http://localhost:${port}`)
-	
-	console.log('\n\nTensorFlow version: ', tf.version.tfjs)
-	tf.setBackend('tensorflow')
-	await tf.ready()
-	console.log(`Backend configurado: ${tf.getBackend()}`)
+	setTimeout(() => {
+		messageChannel.consume(resolveResult)
+	}, 1000)
+
+	console.log(`Executando em http://localhost:${port}\n`)
 })

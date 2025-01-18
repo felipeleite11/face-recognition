@@ -1,8 +1,11 @@
 const redis = require('redis')
+const { randomUUID } = require('crypto')
 
 const redisClient = redis.createClient({
-	url: 'redis://default:123456@easypanel.robot.rio.br:6379'
+	url: process.env.REDIS_URL
 })
+
+const resultTimelife = 30 // sec
 
 exports.redisClient = redisClient
 
@@ -11,6 +14,16 @@ exports.storeFaceID = async function(identifier, url) {
 		await redisClient.connect()
 
 		await redisClient.set(identifier, url)
+	} finally {
+		await redisClient.disconnect()
+	}
+}
+
+exports.storeResult = async function(data) {
+	try {
+		await redisClient.connect()
+
+		await redisClient.setEx(randomUUID(), resultTimelife, JSON.stringify(data))
 	} finally {
 		await redisClient.disconnect()
 	}
