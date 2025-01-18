@@ -57,7 +57,7 @@ exports.getResult = async function(identifier) {
 			throw new Error('ID não encontrado.')
 		}
 
-		return JSON.parse(record)
+		return JSON.parse(result)
 	} catch(e) {
 		console.log(e.message)
 
