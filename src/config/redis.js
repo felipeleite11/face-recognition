@@ -59,7 +59,7 @@ exports.getResult = async function(identifier) {
 	} catch(e) {
 		console.log(e.message)
 
-		return false
+		return null
 	} finally {
 		await redisClient.disconnect()
 	}
