@@ -140,8 +140,6 @@ async function compareImages(referenceImagePath, targetImagePath) {
 }
 
 exports.resolveResult = async function(id, referenceImageURL, imageToCompareURL) {
-	console.log('Iniciando comparação...')
-
 	const comparisonResult = await compareImages(
 		referenceImageURL, 
 		imageToCompareURL
