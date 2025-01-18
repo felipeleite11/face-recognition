@@ -1,5 +1,4 @@
 const redis = require('redis')
-const { randomUUID } = require('crypto')
 
 const redisClient = redis.createClient({
 	url: process.env.REDIS_URL
@@ -54,7 +53,7 @@ exports.getResult = async function(identifier) {
 		const result = await redisClient.get(identifier)
 
 		if(!result) {
-			throw new Error('ID não encontrado.')
+			throw new Error('Resultado não encontrado.')
 		}
 
 		return JSON.parse(result)
