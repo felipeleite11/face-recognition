@@ -2,8 +2,9 @@ require('dotenv/config')
 const cors = require('cors')
 const express = require('express')
 const http = require('http')
+const { randomUUID } = require('crypto')
 const { uploadMinio } = require('./config/multer')
-const { storeFaceID, getReferenceRecord } = require('./config/redis')
+const { storeFaceID, getReferenceRecord, getResult } = require('./config/redis')
 const { loadModels, resolveResult } = require('./config/faceapi')
 const MessageChannel = require('./config/rabbit-mq')
 
@@ -70,17 +71,37 @@ app.post('/compare', uploadMinio.single('file'), async (req, res) => {
 			})
 		}
 
+		const id = randomUUID()
+
 		// Registra a tarefa de comparação no RabbitMQ
-		messageChannel.createMessage({
+		messageChannel.createMessage(id, {
 			reference: referenceImageURL,
 			comparison: imageToCompareURL
 		})
 
-		return res.sendStatus(204)
+		return res.status(201).json({ id })
 	} catch(e) {
 		return res.status(400).json({ message: e.message })
 	}
 })
+
+app.get('/result/:id', async (req, res) => {
+	const { id } = req.params
+
+	try {
+		if(id.length !== 36) {
+			throw new Error('id deve ser um UUID válido.')
+		}
+
+		const result = await getResult(id)
+
+		return res.json(result)
+	} catch(e) {
+		return res.status(400).json({
+			message: e.message
+		})
+	}
+}) 
 
 const server = http.createServer(app)
 

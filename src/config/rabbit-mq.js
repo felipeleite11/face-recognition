@@ -21,12 +21,14 @@ class MessageChannel {
 		}
 	}
 
-	async createMessage(data) {
+	async createMessage(id, data) {
 		try {
 			if(this.channel) {
+				Object.assign(data, { id })
+
 				this.channel.sendToQueue(queueName, Buffer.from(JSON.stringify(data)))
 	
-				console.log('Dados inseridos na fila!')
+				console.log('Dados inseridos na fila!', data)
 			}
 		} catch(e) {
 			console.log('Erro no createMessage', e)
@@ -40,13 +42,13 @@ class MessageChannel {
 
 				console.log('Mensagem recebida', content)
 
-				const { reference, comparison } = content
+				const { id, reference, comparison } = content
 
-				await resolver(reference, comparison)
+				await resolver(id, reference, comparison)
 
 				this.channel?.ack(msg)
 				
-				console.log('Consumido com sucesso!')
+				console.log('Mensagem consumida!')
 			})
 
 			console.log('Consumidor iniciado...\n')

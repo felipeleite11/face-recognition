@@ -3,7 +3,7 @@ const fs = require('fs')
 const { Canvas, Image, ImageData } = require('canvas')
 const faceapi = require('face-api.js')
 const sharp = require('sharp')
-const { default: axios } = require('axios')
+const axios = require('axios')
 const { storeResult } = require('./redis')
 
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData })
@@ -49,7 +49,7 @@ async function getFaceDescriptors(imagePath) {
 }
 
 async function recognizeFaces(referenceImagePath, comparisonImagePath) {
-	console.log('Obtendo descritores da imagem de referÊncia...')
+	console.log('Obtendo descritores da imagem de referência...')
 
 	try {
 		const referenceResponse = await axios.get(referenceImagePath, { responseType: 'arraybuffer' })
@@ -139,7 +139,7 @@ async function compareImages(referenceImagePath, targetImagePath) {
 	return comparisonResult
 }
 
-exports.resolveResult = async function(referenceImageURL, imageToCompareURL) {
+exports.resolveResult = async function(id, referenceImageURL, imageToCompareURL) {
 	console.log('Iniciando comparação...')
 
 	const comparisonResult = await compareImages(
@@ -149,7 +149,7 @@ exports.resolveResult = async function(referenceImageURL, imageToCompareURL) {
 
 	console.log('Gerando resultado...')
 
-	await storeResult({
+	await storeResult(id, {
 		reference: Buffer.isBuffer(referenceImageURL) ? 'buffer' : referenceImageURL,
 		comparison: Buffer.isBuffer(imageToCompareURL) ? 'buffer' : imageToCompareURL,
 		...comparisonResult
