@@ -21,7 +21,9 @@ exports.storeFaceID = async function(identifier, url) {
 
 exports.storeResult = async function(id, data) {
 	try {
-		await redisClient.connect()
+		if(!redisClient.isOpen) {
+			await redisClient.connect()
+		}
 
 		await redisClient.setEx(id, resultTimelife, JSON.stringify(data))
 	} finally {
@@ -49,7 +51,7 @@ exports.getResult = async function(identifier) {
 	try {
 		await redisClient.connect()
 	
-		const record = await redisClient.get(identifier)
+		const result = await redisClient.get(identifier)
 
 		if(!result) {
 			throw new Error('ID não encontrado.')
