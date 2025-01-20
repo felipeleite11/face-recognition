@@ -26,7 +26,9 @@ exports.storeResult = async function(id, data) {
 
 		await redisClient.setEx(id, resultTimelife, JSON.stringify(data))
 	} finally {
-		await redisClient.disconnect()
+		if(redisClient.isOpen) {
+			await redisClient.disconnect()
+		}
 	}
 }
 
@@ -48,7 +50,9 @@ exports.getReferenceRecord = async function(identifier) {
 
 exports.getResult = async function(identifier) {
 	try {
-		await redisClient.connect()
+		if(!redisClient.isOpen) {
+			await redisClient.connect()
+		}
 	
 		const result = await redisClient.get(identifier)
 
@@ -62,6 +66,8 @@ exports.getResult = async function(identifier) {
 
 		return null
 	} finally {
-		await redisClient.disconnect()
+		if(redisClient.isOpen) {
+			await redisClient.disconnect()
+		}
 	}
 }
