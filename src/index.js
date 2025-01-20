@@ -7,6 +7,7 @@ const { uploadMinio } = require('./config/multer')
 const { storeFaceID, getReferenceRecord, getResult } = require('./config/redis')
 const { loadModels, resolveResult } = require('./config/faceapi')
 const MessageChannel = require('./config/rabbit-mq')
+const { validateReferenceImageExtension } = require('./utils/validation')
 
 const messageChannel = new MessageChannel()
 
@@ -36,12 +37,18 @@ app.post('/reference', uploadMinio.single('file'), async (req, res) => {
 			message: 'Houve um erro ao salvar o arquivo enviado.'
 		})
 	}
+
+	const url = req.file?.location
 	
 	try {
-		await storeFaceID(identifier, req.file?.location)
+		await validateReferenceImageExtension(url)
+
+		await storeFaceID(identifier, url)
 
 		return res.sendStatus(201)
 	} catch(e) {
+		console.log(e.message)
+
 		return res.status(400).json({ message: e.message })
 	}
 })
@@ -75,6 +82,7 @@ app.post('/compare', uploadMinio.single('file'), async (req, res) => {
 
 		// Registra a tarefa de comparação no RabbitMQ
 		messageChannel.createMessage(id, {
+			identifier,
 			reference: referenceImageURL,
 			comparison: imageToCompareURL
 		})
@@ -95,7 +103,11 @@ app.get('/result/:id', async (req, res) => {
 
 		const result = await getResult(id)
 
-		return res.json(result)
+		if(result) {
+			return res.json(result)
+		} else {
+			throw new Error('O resultado não está mais disponível.')
+		}
 	} catch(e) {
 		return res.status(400).json({
 			message: e.message

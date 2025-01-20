@@ -4,7 +4,8 @@ const { Canvas, Image, ImageData } = require('canvas')
 const faceapi = require('face-api.js')
 const sharp = require('sharp')
 const axios = require('axios')
-const { storeResult } = require('./redis')
+const { storeResult, storeValidationError } = require('./redis')
+const { validateComparisonImagesExtensions } = require('../utils/validation')
 
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData })
 
@@ -139,17 +140,27 @@ async function compareImages(referenceImagePath, targetImagePath) {
 	return comparisonResult
 }
 
-exports.resolveResult = async function(id, referenceImageURL, imageToCompareURL) {
+exports.resolveResult = async function(content) {
+	const { id, reference, comparison } = content
+
+	try {
+		await validateComparisonImagesExtensions(content)
+	} catch(e) {
+		await storeValidationError(content)
+
+		return
+	}
+
 	const comparisonResult = await compareImages(
-		referenceImageURL, 
-		imageToCompareURL
+		reference,
+		comparison
 	)
 
 	console.log('Gerando resultado...')
 
 	await storeResult(id, {
-		reference: Buffer.isBuffer(referenceImageURL) ? 'buffer' : referenceImageURL,
-		comparison: Buffer.isBuffer(imageToCompareURL) ? 'buffer' : imageToCompareURL,
+		reference: Buffer.isBuffer(reference) ? 'buffer' : reference,
+		comparison: Buffer.isBuffer(comparison) ? 'buffer' : comparison,
 		...comparisonResult
 	})
 

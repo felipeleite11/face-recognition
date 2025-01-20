@@ -71,3 +71,21 @@ exports.getResult = async function(identifier) {
 		}
 	}
 }
+
+exports.storeValidationError = async function(data) {
+	try {
+		data.error = 'Validation error.'
+
+		const { id, ...props } = data
+
+		if(!redisClient.isOpen) {
+			await redisClient.connect()
+		}
+
+		await redisClient.setEx(id, resultTimelife, JSON.stringify(props))
+	} finally {
+		if(redisClient.isOpen) {
+			await redisClient.disconnect()
+		}
+	}
+}

@@ -42,13 +42,11 @@ class MessageChannel {
 
 				console.log('Mensagem recebida', content)
 
-				const { id, reference, comparison } = content
-
-				await resolver(id, reference, comparison)
+				await resolver(content)
 
 				this.channel?.ack(msg)
 				
-				console.log(`Resultado disponível em: http://localhost:3360/result/${id}`)
+				console.log(`Resultado disponível em: http://localhost:3360/result/${content.id}`)
 			})
 
 			console.log('Consumidor iniciado...\n')
