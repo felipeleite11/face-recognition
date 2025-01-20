@@ -48,7 +48,7 @@ class MessageChannel {
 
 				this.channel?.ack(msg)
 				
-				console.log('Mensagem consumida!')
+				console.log(`Resultado disponível em: http://localhost:3360/result/${id}`)
 			})
 
 			console.log('Consumidor iniciado...\n')
