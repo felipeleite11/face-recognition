@@ -1,28 +1,35 @@
 'use client'
 
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useContext, useState } from 'react'
 import { Formik, Form, Field } from 'formik'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
 import classnames from 'classnames'
+import { GlobalContext } from '@/contexts/GlobalContext'
+import { delay } from '@/utils/delay'
 
 interface FormProps {
 	identifier: string
 }
 
-let checkResultInterval: NodeJS.Timeout
-const resultTimeout = 25000
-
 export function ComparisonFunction() {
+	const { socketInstance } = useContext(GlobalContext)
+
 	const [file, setFile] = useState<File | null>(null)
-	const [id, setId] = useState('')
 	const [isProcessing, setIsProcessing] = useState(false)
 	const [result, setResult] = useState<boolean | null>(null)
-	const [resultTimeoutValue, setResultTimeoutValue] = useState(resultTimeout)
 
 	async function handleSubmit(values: FormProps) {
 		try {
+			if(!socketInstance) {
+				throw new Error('Socket não definido!')
+			}
+
+			socketInstance.connect()
+
+			await delay()
+
 			const { identifier } = values
 			
 			const formData = new FormData()
@@ -35,6 +42,7 @@ export function ComparisonFunction() {
 			}
 
 			formData.append('file', file)
+			formData.append('socket_id', String(socketInstance.id))
 
 			toast('Comparação iniciada. Aguarde...')
 
@@ -46,42 +54,12 @@ export function ComparisonFunction() {
 				throw new Error(data.message)
 			}
 
-			setId(data.id)
+			
 		} catch(e) {
 			console.log(e)
 			toast((e as Error).message)
 		}
 	}
-
-	async function checkResult() {
-		try {
-			console.log('Verificando resultado...')
-
-			const { data } = await axios.get(`http://localhost:3360/result/${id}`)
-	
-			console.log('resultado', data)
-
-			setResult(data.isMatch)
-
-			setResultTimeoutValue(resultTimeout)
-		} catch(e) {
-			toast((e as Error).message)
-		} finally {
-			setIsProcessing(false)
-		}
-	}
-
-	useEffect(() => {
-		if(id) {
-			checkResultInterval = setTimeout(checkResult, resultTimeout)
-
-			setInterval(() => {
-				setResultTimeoutValue(old => old >= 1000 ? old - 1000 : 0)
-			}, 1000)
-		} else if(checkResultInterval) {
-			clearInterval(checkResultInterval)
-		}
-	}, [id])
 
 	const isResultDefined = result !== null
 
@@ -144,7 +122,7 @@ export function ComparisonFunction() {
 							<Image src="/loading.gif" alt="" width={80} height={80} />
 							<span>Analisando...</span>
 
-							<span className="text-sm font-bold">{resultTimeoutValue / 1000} segundo(s)</span>
+							{/* <span className="text-sm font-bold">{resultTimeoutValue / 1000} segundo(s)</span> */}
 						</div>
 					) : null}
 

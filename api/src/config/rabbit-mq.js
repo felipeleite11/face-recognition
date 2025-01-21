@@ -35,21 +35,21 @@ class MessageChannel {
 		}
 	}
 
-	async consume(resolver) {
+	async consume(resolver, io) {
 		if(this.channel) {
 			this.channel?.consume(queueName, async msg => {
 				const content = JSON.parse(msg?.content.toString())
 
 				console.log('Mensagem recebida', content)
 
-				await resolver(content)
+				await resolver(content, io)
 
 				this.channel?.ack(msg)
 				
 				console.log(`Resultado disponível em: http://localhost:3360/result/${content.id}`)
 			})
 
-			console.log('Consumidor iniciado...\n')
+			console.log('Consumer iniciado...\n')
 		}
 	}
 }

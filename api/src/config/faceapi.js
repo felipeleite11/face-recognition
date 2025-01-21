@@ -4,8 +4,8 @@ const { Canvas, Image, ImageData } = require('canvas')
 const faceapi = require('face-api.js')
 const sharp = require('sharp')
 const axios = require('axios')
-const { storeResult, storeValidationError } = require('./redis')
 const { validateComparisonImagesExtensions } = require('../utils/validation')
+const { connectedClients } = require('../index')
 
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData })
 
@@ -140,29 +140,31 @@ async function compareImages(referenceImagePath, targetImagePath) {
 	return comparisonResult
 }
 
-exports.resolveResult = async function(content) {
-	const { id, reference, comparison } = content
+exports.resolveResult = async function(content, io) {
+	const { reference, comparison, socket_id } = content
 
 	try {
 		await validateComparisonImagesExtensions(content)
 	} catch(e) {
-		await storeValidationError(content)
+		io.to(socket_id).emit('validation_error', 'As imagens não são válidas!')
 
 		return
 	}
+
+	console.log('Gerando resultado...')
 
 	const comparisonResult = await compareImages(
 		reference,
 		comparison
 	)
 
-	console.log('Gerando resultado...')
+	const socketClient = connectedClients.find(client => client.id === socket_id)
 
-	await storeResult(id, {
-		reference: Buffer.isBuffer(reference) ? 'buffer' : reference,
-		comparison: Buffer.isBuffer(comparison) ? 'buffer' : comparison,
-		...comparisonResult
-	})
+	if(socketClient) {
+		console.log('Emitindo resultado para', socket_id)
 
-	console.log('Resultado registrado no Redis...')
+		socketClient.emit('result', comparisonResult)
+	} else {
+		throw new Error('Cliente socket não encontrado!')
+	}
 }
