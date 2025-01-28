@@ -8,6 +8,7 @@ import Image from 'next/image'
 import classnames from 'classnames'
 import { useDebouncedCallback } from 'use-debounce'
 import { connectSocket, socket } from '@/config/socket'
+import { api } from '@/config/api'
 
 interface FormProps {
 	identifier: string
@@ -44,7 +45,7 @@ export function ComparisonForm() {
 			formData.append('file', file)
 			formData.append('socket_id', String(socket.id))
 
-			const { data } = await axios.post('http://localhost:3360/compare', formData)
+			const { data } = await api.post('compare', formData)
 
 			if (data.message) {
 				throw new Error(data.message)
@@ -62,7 +63,7 @@ export function ComparisonForm() {
 
 	const handleReferenceChange = useDebouncedCallback(async (identifier: string) => {
 		try {
-			const { data } = await axios.get<{ reference: string }>(`http://localhost:3360/reference/${identifier}`)
+			const { data } = await api.get<{ reference: string }>(`reference/${identifier}`)
 
 			setReferenceURLPreview(data.reference)
 		} catch (e) {

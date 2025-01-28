@@ -5,6 +5,7 @@ import { Formik, Form, Field } from 'formik'
 import toast from 'react-hot-toast'
 import axios from 'axios'
 import classNames from 'classnames'
+import { api } from '@/config/api'
 
 interface FormProps {
 	identifier: string
@@ -28,7 +29,7 @@ export function ReferenceForm() {
 
 			formData.append('file', file)
 
-			const { data } = await axios.post('http://localhost:3360/reference', formData)
+			const { data } = await api.post('reference', formData)
 
 			if(data.message) {
 				throw new Error(data.message)
