@@ -12,6 +12,7 @@ interface FormProps {
 
 export function ReferenceForm() {
 	const [file, setFile] = useState<File | null>(null)
+	const [URLPreview, setURLPreview] = useState<string | null>(null)
 
 	async function handleSubmit(values: FormProps) {
 		try {
@@ -52,6 +53,10 @@ export function ReferenceForm() {
 				<Form className="flex flex-col gap-4">
 					<h1 className="font-bold text-lg text-center">Foto de referência</h1>
 
+					{URLPreview && (
+						<img src={URLPreview} alt="" className="w-56 rounded-md" />
+					)}
+
 					<label
 						htmlFor="file"
 						className="py-2 px-4 bg-white rounded-md h-11 text-slate-800 flex items-center"
@@ -71,7 +76,12 @@ export function ReferenceForm() {
 						onChange={(e: ChangeEvent<HTMLInputElement>) => {
 							const file = e.currentTarget.files?.[0] || null
 
-							setFile(file)
+							if (file) {
+								const url = URL.createObjectURL(file)
+
+								setURLPreview(url)
+								setFile(file)
+							}
 						}}
 					/>
 
