@@ -3,7 +3,6 @@
 import { ChangeEvent, useState } from 'react'
 import { Formik, Form, Field } from 'formik'
 import toast from 'react-hot-toast'
-import axios from 'axios'
 import classNames from 'classnames'
 import { api } from '@/config/api'
 

@@ -2,7 +2,7 @@
 
 import { ChangeEvent, useEffect, useState } from 'react'
 import { Formik, Form, Field } from 'formik'
-import axios, { AxiosError } from 'axios'
+import { AxiosError } from 'axios'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
 import classnames from 'classnames'
