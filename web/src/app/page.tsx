@@ -1,4 +1,4 @@
-import { ComparisonFunction } from '@/components/ComparisonForm'
+import { ComparisonForm } from '@/components/ComparisonForm'
 import { ReferenceForm } from '@/components/ReferenceForm'
 
 export default function Home() {
@@ -8,7 +8,7 @@ export default function Home() {
 
 			<div className="h-screen w-[1px] bg-white" />
 
-			<ComparisonFunction />
+			<ComparisonForm />
 		</main>
 	)
 }

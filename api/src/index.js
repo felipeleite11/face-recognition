@@ -5,16 +5,14 @@ const http = require('http')
 const { randomUUID } = require('crypto')
 const { Server } = require('socket.io')
 const { uploadMinio } = require('./config/multer')
-const { storeFaceID, getReferenceRecord, getResult } = require('./config/redis')
 const { loadModels, resolveResult } = require('./config/faceapi')
 const MessageChannel = require('./config/rabbit-mq')
 const { validateReferenceImageExtension } = require('./utils/validation')
+const { getReferenceRecord, storeFaceID } = require('./config/mongodb')
 
 const messageChannel = new MessageChannel()
 
 let connectedClients = []
-
-exports.connectedClients = connectedClients
 
 const app = express()
 
@@ -45,6 +43,8 @@ io.on('connection', socket => {
 	console.log('Usuário conectado', socket.id)
 
 	connectedClients.push(socket)
+
+	// console.log('sockets', connectedClients.length)
 
 	socket.on('disconnect', () => {
 		try {
@@ -95,23 +95,22 @@ app.post('/reference', uploadMinio.single('file'), async (req, res) => {
 app.post('/compare', uploadMinio.single('file'), async (req, res) => {
 	const { identifier, socket_id } = req.body
 
-	console.log('socket_id', socket_id)
-
-	if(!identifier) {
+	if(!identifier || !socket_id || !req.file?.location) {
 		return res.status(404).json({
-			message: 'Identificador não informado!'
-		})
-	}
-
-	if(!req.file?.location) {
-		return res.status(404).json({
-			message: 'Houve um erro ao salvar o arquivo enviado.'
+			message: 'A requisição está incompleta.'
 		})
 	}
 
 	try {
-		const referenceImageURL = await getReferenceRecord(identifier)
 		const imageToCompareURL = req.file?.location
+
+		if(!imageToCompareURL) {
+			return res.status(404).json({
+				message: 'A imagem de comparação não foi encontrada.'
+			})
+		}
+
+		const referenceImageURL = await getReferenceRecord(identifier)
 
 		if(!referenceImageURL) {
 			return res.status(404).json({
@@ -129,35 +128,31 @@ app.post('/compare', uploadMinio.single('file'), async (req, res) => {
 			comparison: imageToCompareURL
 		})
 
-		io.to(socket_id).emit('message', 'MENSAGEM ENFILEIRADA...')
-		console.log('Mensagem emitida para o cliente socket', socket_id)
+		console.log('socket_id processing', socket_id)
 
-		return res.status(201).json({ id })
+		io.to(socket_id).emit('status_change', 'processing')
+		console.log('status_change = PROCESSING emitida para o socket:', socket_id)
+
+		return res.sendStatus(201)
 	} catch(e) {
 		return res.status(400).json({ message: e.message })
 	}
 })
 
-app.get('/result/:id', async (req, res) => {
-	const { id } = req.params
+app.get('/reference/:identifier', async (req, res) => {
+	const { identifier } = req.params
 
-	try {
-		if(id.length !== 36) {
-			throw new Error('id deve ser um UUID válido.')
-		}
+	const referenceImageURL = await getReferenceRecord(identifier)
 
-		const result = await getResult(id)
-
-		if(result) {
-			return res.json(result)
-		} else {
-			throw new Error('O resultado não está mais disponível.')
-		}
-	} catch(e) {
-		return res.status(400).json({
-			message: e.message
+	if(!referenceImageURL) {
+		return res.status(404).json({
+			message: 'Nenhuma imagem de referência associada a este identificador.'
 		})
 	}
+
+	return res.json({
+		reference: referenceImageURL
+	})
 })
 
 // Rabbit MQ

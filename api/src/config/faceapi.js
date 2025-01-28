@@ -5,7 +5,6 @@ const faceapi = require('face-api.js')
 const sharp = require('sharp')
 const axios = require('axios')
 const { validateComparisonImagesExtensions } = require('../utils/validation')
-const { connectedClients } = require('../index')
 
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData })
 
@@ -148,22 +147,24 @@ exports.resolveResult = async function(content, io) {
 	} catch(e) {
 		io.to(socket_id).emit('validation_error', 'As imagens não são válidas!')
 
+
 		return
 	}
 
-	console.log('Gerando resultado...')
+	console.log(`Gerando resultado (socket ${socket_id})...`)
 
 	const comparisonResult = await compareImages(
 		reference,
 		comparison
 	)
 
-	const socketClient = connectedClients.find(client => client.id === socket_id)
+	io.to(socket_id).emit('status_change', 'done')
+	console.log('status_change = DONE emitido para o socket:', socket_id)
 
-	if(socketClient) {
+	if(socket_id) {
 		console.log('Emitindo resultado para', socket_id)
 
-		socketClient.emit('result', comparisonResult)
+		io.to(socket_id).emit('result', comparisonResult)
 	} else {
 		throw new Error('Cliente socket não encontrado!')
 	}

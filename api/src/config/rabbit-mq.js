@@ -45,8 +45,6 @@ class MessageChannel {
 				await resolver(content, io)
 
 				this.channel?.ack(msg)
-				
-				console.log(`Resultado disponível em: http://localhost:3360/result/${content.id}`)
 			})
 
 			console.log('Consumer iniciado...\n')
