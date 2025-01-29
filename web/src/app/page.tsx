@@ -1,14 +1,9 @@
-import { ComparisonForm } from '@/components/ComparisonForm'
-import { ReferenceForm } from '@/components/ReferenceForm'
+import { useRouter } from "next/navigation"
 
 export default function Home() {
-	return (
-		<main className="flex justify-center gap-4 py-16">
-			<ReferenceForm />
+	const router = useRouter()
 
-			<div className="h-screen w-[1px] bg-white" />
+	router.push('/reference')
 
-			<ComparisonForm />
-		</main>
-	)
+	return null
 }

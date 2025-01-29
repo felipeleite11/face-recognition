@@ -18,14 +18,18 @@ const Face = connection.model('faces', faceSchema)
 
 
 exports.storeFaceID = async function(identifier, url) {
-	try {
-		await Face.create({
-			identifier,
-			url
-		})
-	} catch(e) {
-		console.log(e)
+	const data = await Face.findOne({
+		identifier
+	})
+
+	if(data) {
+		throw new Error('Esta referência já existe.')
 	}
+
+	await Face.create({
+		identifier,
+		url
+	})
 }
 
 exports.getReferenceRecord = async function(identifier) {
