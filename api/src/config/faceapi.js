@@ -140,32 +140,42 @@ async function compareImages(referenceImagePath, targetImagePath) {
 }
 
 exports.resolveResult = async function(content, io) {
-	const { reference, comparison, socket_id } = content
+	const { identifier, reference, comparison, socket_id, webhook_url, telegram_user_id } = content
 
 	try {
 		await validateComparisonImagesExtensions(content)
 	} catch(e) {
 		io.to(socket_id).emit('validation_error', 'As imagens não são válidas!')
 
-
 		return
 	}
 
-	console.log(`Gerando resultado (socket ${socket_id})...`)
+	console.log('Iniciando comparação...')
 
 	const comparisonResult = await compareImages(
 		reference,
 		comparison
 	)
 
-	io.to(socket_id).emit('status_change', 'done')
-	console.log('status_change = DONE emitido para o socket:', socket_id)
+	if(comparisonResult) {
+		console.log('Resultado gerado!')
+	}
 
 	if(socket_id) {
-		console.log('Emitindo resultado para', socket_id)
+		io.to(socket_id).emit('status_change', 'done')
+		
+		console.log('status_change = DONE emitido para o socket:', socket_id)
 
 		io.to(socket_id).emit('result', comparisonResult)
+		
+		console.log('Resultado emitido para', socket_id)
+	} else if(webhook_url && telegram_user_id) {
+		axios.post(webhook_url, {
+			identifier,
+			telegram_user_id,
+			...comparisonResult
+		})
 	} else {
-		throw new Error('Cliente socket não encontrado!')
+		throw new Error('Nenhum socket ou webhook definido para enviar o resultado.')
 	}
 }

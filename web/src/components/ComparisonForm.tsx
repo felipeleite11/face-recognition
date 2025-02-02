@@ -85,7 +85,7 @@ export function ComparisonForm() {
 		socket.on('status_change', status => {
 			console.log('Status change:', status)
 
-			if(status === 'done') {
+			if (status === 'done') {
 				setIsProcessing(false)
 			}
 		})
@@ -107,109 +107,111 @@ export function ComparisonForm() {
 	const isResultDefined = result !== null
 
 	return (
-		<Formik
-			onSubmit={handleSubmit}
-			initialValues={{
-				identifier: ''
-			}}
-		>
-			{({ resetForm, setFieldValue }) => (
-				<Form className="flex flex-col gap-4">
-					<h1 className="font-bold text-lg text-center">Autenticação</h1>
+		<div className="w-[50%] flex justify-center">
+			<Formik
+				onSubmit={handleSubmit}
+				initialValues={{
+					identifier: ''
+				}}
+			>
+				{({ resetForm, setFieldValue }) => (
+					<Form className="flex flex-col gap-4 w-[40rem] items-center">
+						<h1 className="font-bold text-lg text-center">Autenticação</h1>
 
-					{comparisonURLPreview && (
-						<img src={comparisonURLPreview} alt="" className="w-56 rounded-md" />
-					)}
+						{comparisonURLPreview && (
+							<img src={comparisonURLPreview} alt="" className="w-56 rounded-md" />
+						)}
 
-					<label
-						htmlFor="file-2"
-						className="py-2 px-4 bg-white rounded-md h-11 text-slate-800 flex items-center"
-					>
-						<span className={classnames({
-							'opacity-60': !file?.name,
-							'opacity-100': !!file?.name
-						})}>
-							{file?.name || 'Selecione a imagem'}
-						</span>
-					</label>
-
-					<input
-						id="file-2"
-						type="file"
-						className="hidden"
-						onChange={(e: ChangeEvent<HTMLInputElement>) => {
-							const file = e.currentTarget.files?.[0] || null
-
-							if (file) {
-								const url = URL.createObjectURL(file)
-
-								setComparisonURLPreview(url)
-								setFile(file)
-							}
-						}}
-					/>
-
-					<Field
-						name="identifier"
-						className="py-2 px-4 rounded-md h-11 text-slate-800 outline-none"
-						placeholder="Identificador da pessoa"
-						onChange={(e: ChangeEvent<HTMLInputElement>) => {
-							const value = e.target.value
-
-							setFieldValue('identifier', value)
-
-							handleReferenceChange(value)
-						}}
-					/>
-
-					{referenceURLPreview && (
-						<img src={referenceURLPreview} alt="" className="w-56 rounded-md" />
-					)}
-
-					<button
-						type="submit"
-						className="py-2 px-4 bg-white text-slate-800 rounded-md disabled:opacity-80"
-						disabled={isProcessing || isResultDefined || !referenceURLPreview || !comparisonURLPreview}
-					>
-						Autenticar
-					</button>
-
-					{result === true ? (
-						<div className="flex flex-col items-center justify-center text-white text-sm">
-							<Image src="/success.gif" alt="" width={80} height={80} />
-							<span>Autenticado com sucesso!</span>
-						</div>
-					) : result === false ? (
-						<div className="flex flex-col items-center justify-center text-white text-sm">
-							<Image src="/fail.gif" alt="" width={80} height={80} />
-							<span>Falha na autenticação!</span>
-						</div>
-					) : isProcessing ? (
-						<div className="flex flex-col items-center justify-center text-white text-sm">
-							<Image src="/loading.gif" alt="" width={80} height={80} />
-							<span>Analisando...</span>
-						</div>
-					) : null}
-
-					{isResultDefined && (
-						<button
-							type="button"
-							className="py-2 px-4 bg-white text-slate-800 rounded-md"
-							onClick={() => {
-								resetForm()
-
-								setFile(null)
-								setResult(null)
-								setIsProcessing(false)
-								setComparisonURLPreview(null)
-								setReferenceURLPreview(null)
-							}}
+						<label
+							htmlFor="file-2"
+							className="py-2 px-4 bg-white rounded-md h-11 text-slate-800 flex items-center w-full"
 						>
-							Limpar
+							<span className={classnames({
+								'opacity-60': !file?.name,
+								'opacity-100': !!file?.name
+							})}>
+								{file?.name || 'Selecione a imagem'}
+							</span>
+						</label>
+
+						<input
+							id="file-2"
+							type="file"
+							className="hidden"
+							onChange={(e: ChangeEvent<HTMLInputElement>) => {
+								const file = e.currentTarget.files?.[0] || null
+
+								if (file) {
+									const url = URL.createObjectURL(file)
+
+									setComparisonURLPreview(url)
+									setFile(file)
+								}
+							}}
+						/>
+
+						<Field
+							name="identifier"
+							className="py-2 px-4 rounded-md h-11 text-slate-800 outline-none w-full"
+							placeholder="Identificador da pessoa"
+							onChange={(e: ChangeEvent<HTMLInputElement>) => {
+								const value = e.target.value
+
+								setFieldValue('identifier', value)
+
+								handleReferenceChange(value)
+							}}
+						/>
+
+						{referenceURLPreview && (
+							<img src={referenceURLPreview} alt="" className="w-56 rounded-md" />
+						)}
+
+						<button
+							type="submit"
+							className="py-2 px-4 bg-white text-slate-800 rounded-md disabled:opacity-80 w-full"
+							disabled={isProcessing || isResultDefined || !referenceURLPreview || !comparisonURLPreview}
+						>
+							Autenticar
 						</button>
-					)}
-				</Form>
-			)}
-		</Formik>
+
+						{result === true ? (
+							<div className="flex flex-col items-center justify-center text-white text-sm">
+								<Image src="/success.gif" alt="" width={80} height={80} />
+								<span>Autenticado com sucesso!</span>
+							</div>
+						) : result === false ? (
+							<div className="flex flex-col items-center justify-center text-white text-sm">
+								<Image src="/fail.gif" alt="" width={80} height={80} />
+								<span>Falha na autenticação!</span>
+							</div>
+						) : isProcessing ? (
+							<div className="flex flex-col items-center justify-center text-white text-sm">
+								<Image src="/loading.gif" alt="" width={80} height={80} />
+								<span>Analisando...</span>
+							</div>
+						) : null}
+
+						{isResultDefined && (
+							<button
+								type="button"
+								className="py-2 px-4 bg-white text-slate-800 rounded-md w-full"
+								onClick={() => {
+									resetForm()
+
+									setFile(null)
+									setResult(null)
+									setIsProcessing(false)
+									setComparisonURLPreview(null)
+									setReferenceURLPreview(null)
+								}}
+							>
+								Limpar
+							</button>
+						)}
+					</Form>
+				)}
+			</Formik>
+		</div>
 	)
 }

@@ -16,7 +16,6 @@ const connection = mongoose.createConnection(process.env.MONGO_URL, {
 
 const Face = connection.model('faces', faceSchema)
 
-
 exports.storeFaceID = async function(identifier, url) {
 	const data = await Face.findOne({
 		identifier

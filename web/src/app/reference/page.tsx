@@ -2,7 +2,7 @@ import { ReferenceForm } from '@/components/ReferenceForm'
 
 export default function Reference() {
 	return (
-		<main>
+		<main className="flex justify-center">
 			<ReferenceForm />
 		</main>
 	)

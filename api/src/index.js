@@ -93,9 +93,13 @@ app.post('/reference', uploadMinio.single('file'), async (req, res) => {
 })
 
 app.post('/compare', uploadMinio.single('file'), async (req, res) => {
-	const { identifier, socket_id } = req.body
+	const { 
+		identifier, 
+		socket_id, // If web client
+		webhook_url, telegram_user_id // IF Telegram client
+	} = req.body
 
-	if(!identifier || !socket_id || !req.file?.location) {
+	if(!identifier || (!socket_id && !(webhook_url && telegram_user_id)) || !req.file?.location) {
 		return res.status(404).json({
 			message: 'A requisição está incompleta.'
 		})
@@ -124,14 +128,18 @@ app.post('/compare', uploadMinio.single('file'), async (req, res) => {
 		messageChannel.createMessage(id, {
 			identifier,
 			socket_id,
+			webhook_url,
+			telegram_user_id,
 			reference: referenceImageURL,
 			comparison: imageToCompareURL
 		})
 
-		console.log('socket_id processing', socket_id)
+		if(socket_id) {
+			console.log('socket_id processing', socket_id)
 
-		io.to(socket_id).emit('status_change', 'processing')
-		console.log('status_change = PROCESSING emitida para o socket:', socket_id)
+			io.to(socket_id).emit('status_change', 'processing')
+			console.log('status_change = PROCESSING emitida para o socket:', socket_id)
+		}
 
 		return res.sendStatus(201)
 	} catch(e) {
@@ -153,6 +161,12 @@ app.get('/reference/:identifier', async (req, res) => {
 	return res.json({
 		reference: referenceImageURL
 	})
+})
+
+app.post('/webhook_result', (req, res) => {
+	console.log('Resultado recebido via webhook:', req.body)
+
+	return res.sendStatus(204)
 })
 
 // Rabbit MQ
